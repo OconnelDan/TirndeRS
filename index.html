@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>TindeRS</title>
+</head>
+<body>
+    <main>
+        <section>
+
+            <header>
+                <img src="photos\tinder-logo.webp" alt="TindeRS Logo"/>
+            </header>
+
+            <div class="cards">
+                <article>
+                    <img src="./photos/woman-on-a-football-field.jpg" alt="Alejandra, 25 age, white hair woman" />
+                    <h2>Alejandra <span>25</span></h2>
+                    <div class="choise nope">NOPE</div>
+                    <div class="choise like">LIKE</div>
+                </article>
+
+                <article>
+                    <img src="./photos/outdoor-woman.jpg" alt="Manoli, 26 age, red hair woman" />
+                    <h2>Manoli <span>26</span></h2>
+                    <div class="choice nope">NOPE</div>
+                    <div class="choice like">LIKE</div>
+                </article>
+                
+                <span>
+                    No hay personas mas cerca de ti... </br>
+                    Vuelve a intentarlo mas tarde 
+                </span>
+
+
+            </div>
+
+            <footer>
+                <button class="is-undo" aria-label="undo"></button>
+                <button class=" is-remove is-big" aria-label="remove"></button>
+                <button class="is-star" aria-label="start"></button>
+                <button class="is-fav is-big" aria-label="fav"></button>
+                <button class="is-zap" aria-label="zap"></button>
+            </footer>
+
+
+        </section>
+    </main>
+
+    <script>
+        const DECISION_THRESHOLD = 80
+        let isAnimating = false
+        let pullDeltaX = 0 // distancia que la card se esta arrastrando
+
+        function starDrag (event){
+            if (isAnimating) return
+            
+            //coger el primer articulo
+            const actualCard = event.target.closest('article')
+
+            //coger la posicion inicial del puntero
+            const startX = event.pageX ?? event.touches[0].pageX 
+           
+
+            //escuchar el puntero y los movimientos de los dedos            
+            document.addEventListener ('mousemove', onMove)
+            document.addEventListener('mouseup', onEnd)
+
+            document.addEventListener ('touchmove', onMove, { passive: true })
+            document.addEventListener('touchend', onEnd, { passive: true })
+
+            function onMove (event) {
+                 //posicion actual del mouse o del dedo
+                const currentX = event.pageX ?? event.touches[0].pageX                 
+                // la distancia que ha recorrido el dedo o el mouse
+                pullDeltaX = currentX - startX
+                //no hay distacia recorrida
+                if (pullDeltaX === 0) return
+                //cambio que indica el inicio de la animacion
+                isAnimating = true
+                //calculo de la rotacion de la carta 
+                const deg = pullDeltaX / 14
+
+                //aplicamos transformacion de card
+                actualCard.style.transform = `translateX(${pullDeltaX}px) rotate(${deg}deg)`
+                //cambiamos cursor a grabbing                
+                actualCard.style.cursor ='grabbing'
+
+            }
+
+            function onEnd (event){
+                //limpiamos el evento listener
+                document.removeEventListener('mousemove', onMove)
+                document.removeEventListener('mouseup', onEnd)
+
+                document.removeEventListener('touchmove', onMove)
+                document.removeEventListener('touchend', onEnd)
+                
+               //saber si el usuario tomo una decision
+               const decisioMade = Math.abs(pullDeltaX) >= DECISION_THRESHOLD
+               
+               if (decisioMade) {
+                    const goRight = pullDeltaX >= 0
+                    const goLeft = !goRight
+                //añadimos una clase acorde de la decision
+                    actualCard.classList.add(goRight ? 'go-right' : 'go-left')
+                    actualCard.addEventListener('transitionend', () => {
+                        actualCard.remove()                        
+                    }, { once: true})
+               }  else {
+                   actualCard.classList.add('reset')
+                   actualCard.classList.remove('go-right', 'go-left') 
+                    
+               } 
+
+               //reset de variables
+               actualCard.addEventListener('transitionend', () => {
+                actualCard.removeAttribute('style')
+                actualCard.classList.remove('reset')
+                
+                pullDeltaX = 0
+                isAnimating = false
+               })
+             
+            }
+
+        }
+
+        
+
+
+        document.addEventListener('mousedown', starDrag)
+        document.addEventListener('touchstart', starDrag, { passive: true})
+    </script>
+</body>
+</html>
