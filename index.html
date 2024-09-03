@@ -18,17 +18,17 @@
                 <article>
                     <img src="./photos/woman-on-a-football-field.jpg" alt="Alejandra, 25 age, white hair woman" />
                     <h2>Alejandra <span>25</span></h2>
-                    <div class="choise nope">NOPE</div>
-                    <div class="choise like">LIKE</div>
+                    <div class="choice Nope">NOPE</div>
+                    <div class="choice Like">LIKE</div>
                 </article>
 
                 <article>
                     <img src="./photos/outdoor-woman.jpg" alt="Manoli, 26 age, red hair woman" />
                     <h2>Manoli <span>26</span></h2>
-                    <div class="choice nope">NOPE</div>
-                    <div class="choice like">LIKE</div>
+                    <div class="choice Nope">NOPE</div>
+                    <div class="choice Like">LIKE</div>
                 </article>
-                
+
                 <span>
                     No hay personas mas cerca de ti... </br>
                     Vuelve a intentarlo mas tarde 
@@ -59,6 +59,7 @@
             
             //coger el primer articulo
             const actualCard = event.target.closest('article')
+            if (!actualCard) return
 
             //coger la posicion inicial del puntero
             const startX = event.pageX ?? event.touches[0].pageX 
@@ -88,6 +89,16 @@
                 //cambiamos cursor a grabbing                
                 actualCard.style.cursor ='grabbing'
 
+                //cambio de opacidad segun la decision
+                const opacity = Math.abs(pullDeltaX) / 100
+                const isRight = pullDeltaX > 0
+
+                const choiceEl = isRight
+                    ? actualCard.querySelector('.choice.Like')
+                    : actualCard.querySelector('.choice.Nope')
+
+                choiceEl.style.opacity = opacity
+
             }
 
             function onEnd (event){
@@ -111,7 +122,11 @@
                     }, { once: true})
                }  else {
                    actualCard.classList.add('reset')
-                   actualCard.classList.remove('go-right', 'go-left') 
+                   actualCard.classList.remove('go-right', 'go-left')
+
+                   actualCard.querySelectorAll('.choice').forEach(choice => {
+                       choice.style.opacity = 0
+        }) 
                     
                } 
 
